@@ -1,0 +1,942 @@
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История Казахстана</title>
+    <link rel="stylesheet" href="style.css">
+  <!-- Подключаем Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <!-- Подключаем jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Подключаем GSAP для анимаций -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.1/gsap.min.js"></script>
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+
+    <!-- Подключаем стили Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<!-- Подключаем стили для плагина Leaflet.markercluster -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+
+<!-- Подключаем саму библиотеку Leaflet -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- Подключаем плагин Leaflet.markercluster -->
+<script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <style>
+        .scroll-btn {
+    position: fixed;
+    bottom: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 100;
+}
+
+#scrollUp {
+    right: 20px;
+}
+
+#scrollDown {
+    left: 20px;
+}
+
+.scroll-btn:hover {
+    background-color: rgba(0, 0, 0, 0.9);
+}
+        .scroll-up-btn {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background-color: #007bff;
+            color: white;
+            font-size: 24px;
+            padding: 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .scroll-up-btn:hover {
+            background-color: #0056b3;
+        }
+         body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+    .timeline {
+      margin: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .year-buttons {
+      margin-bottom: 20px;
+    }
+    .year-button {
+      margin: 5px;
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .year-button:hover {
+      background-color: #0056b3;
+    }
+    .event {
+      margin-top: 10px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 80%;
+      text-align: center;
+      background-color: #ffffff;
+    }
+
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        header {
+            background-color: #66ffff;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 0px solid #fff;
+            border-radius: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        button {
+            padding: 5px 10px;
+            background-color: #d14836;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #a63224;
+        }
+
+        /* Альтернативные стили */
+        .alt-theme {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .alt-theme header {
+            background-color: #333;
+            color: #66ffff;
+        }
+
+        .alt-theme table th {
+            background-color: #555;
+            color: #fff;
+        }
+
+        .alt-theme table tr:nth-child(even) {
+            background-color: #444;
+        }
+
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        body.dark-theme {
+  background-color: #000;
+  color: #fff;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 20px;
+  cursor: pointer;
+}
+
+button.dark-theme {
+  background-color: #444;
+  color: #fff;
+  border: none;
+}
+
+/* Стили для слайдера */
+.image-slider {
+    width: 50%;
+    margin: 0 auto;
+    padding: 0;
+    border: 2px solid #0085ca;
+    border-radius: 6px;
+    overflow: hidden; /* Обрезаем изображение, если оно выходит за пределы контейнера */
+}
+
+/* Стили для изображений */
+.image-slider img {
+    width: 100%; /* Изображения заполняют контейнер */
+    height: auto;
+    border-radius: 6px;
+    transition: all 0.5s ease-in-out;
+}
+
+/* Эффекты на изображениях при переходе */
+.slick-slide img {
+    transition: transform 1s ease, opacity 0.5s ease;
+}
+
+/* Эффект при переходе (масштабирование и плавное исчезновение/появление) */
+.slick-slide.slick-current img {
+    transform: scale(1.1); /* Увеличиваем изображение при активации */
+    opacity: 1;
+}
+
+.slick-slide.slick-prev img, .slick-slide.slick-next img {
+    transform: scale(0.9); /* Уменьшаем изображения на соседних слайдах */
+    opacity: 0.5;
+}
+
+/* Стили для кнопок навигации */
+.slick-prev, .slick-next {
+    background-color: #0085ca;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+/* Стили для стрелок при наведении */
+.slick-prev:hover, .slick-next:hover {
+    background-color: #005f7a;
+}
+
+/* Убираем маргинальные отступы между слайдами */
+.slick-slide {
+    margin: 0 5px;
+}
+/* Контейнер карты, который будет всегда по центру */
+        #map {
+            height: 500px;          /* Высота карты */
+            width: 80%;             /* Ширина карты, 80% экрана */
+            margin: 0 auto;         /* Центрирование по горизонтали */
+            display: block;         /* Блочный элемент, чтобы центрирование работало */
+        }
+
+        /* Для устройств с маленьким экраном или на мобильных устройствах */
+        @media (max-width: 768px) {
+            #map {
+                width: 100%;         /* На маленьких экранах карта будет занимать 100% ширины */
+                height: 300px;       /* Уменьшаем высоту для мобильных устройств */
+            }
+        }
+        .hidden { display: none; }
+        .search-bar { margin-bottom: 10px; padding: 8px; width: 100%; }
+        .content { margin-bottom: 20px; }
+
+
+
+    </style>
+</head>
+<body>
+    <header>
+        <p id="shadow" align="center">
+            <font size="7" color="red"><strong>И</strong></font>
+            <font size="5"><strong>стория Казахстана</strong></font>
+        </p>
+        <hr color="blue">
+        <nav>
+            <a href="https://e-history.kz/ru" target="_blank">Официальный сайт истории Казахстана</a>
+            <a href="https://www.do.ektu.kz/doektu/?lang=ru" target="_blank">Источник</a>
+        </nav>
+    </header>
+
+    <h2>Навигация</h2>
+    <input type="text" id="filter-input" placeholder="Введите текст для фильтрации" />
+    <button id="filter-button">Фильтровать</button>
+    <button id="clear-filter-button">Очистить фильтр</button>
+    <!-- Добавление элемента -->
+<button id="add-button">Добавить элемент</button>
+
+    <button id="sort-button">Сортировать</button> <!-- Кнопка сортировки -->
+    <button id="toggle-style">Сменить стиль</button> <!-- Кнопка для смены стиля -->
+
+    <!-- Таблица с этапами истории Казахстана -->
+    <table id="history-table">
+        <thead>
+            <tr>
+                <th>Этап</th>
+                <th>Год</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-order="3">
+                <td>Современный Казахстан</td>
+                <td>1991</td>
+                <td><button class="remove-button">Удалить</button></td>
+            </tr>
+            <tr data-order="2">
+                <td>Средневековье</td>
+                <td>1200</td>
+                <td><button class="remove-button">Удалить</button></td>
+            </tr>
+            <tr data-order="1">
+                <td>Древний Казахстан</td>
+                <td>500</td>
+                <td><button class="remove-button">Удалить</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Основные этапы становления</h2>
+
+    <article id="historical-event">
+        <h3>Важное историческое событие</h3>
+        <p>В 1991 году Казахстан стал независимым государством, что стало значимым этапом в его истории.</p>
+    </article>
+
+    <section id="additional-materials">
+        <h3>Дополнительные материалы</h3>
+        <p>Казахстан имеет множество музеев и памятников, которые рассказывают о его богатой истории.</p>
+    </section>
+
+    <div id="canvas-animation-container">
+        <canvas id="canvas-animation" width="200" height="100"></canvas>
+    </div>
+
+    <h2>График исторических событий</h2>
+    <canvas id="history-chart" width="400" height="200"></canvas>
+
+    <!-- Модальное окно -->
+<div id="modal-add-event" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Добавить новое событие</h3>
+        <label for="event-name">Название события:</label>
+        <input type="text" id="event-name" placeholder="Название события">
+        <label for="event-year">Год события:</label>
+        <input type="number" id="event-year" placeholder="Год события">
+        <button id="save-event-button">Сохранить</button>
+    </div>
+</div>
+
+    <div id="app">
+  <h1>История Казахстана</h1>
+  <div class="timeline">
+    <div class="year-buttons">
+      <button class="year-button" v-for="year in years" @click="selectYear(year)">
+        {{ year }}
+      </button>
+    </div>
+    <div class="event" v-if="selectedEvent">
+      <h2>{{ selectedEvent.year }} год</h2>
+      <p>{{ selectedEvent.description }}</p>
+    </div>
+    <div v-else>
+      <p>Выберите год, чтобы увидеть важные события.</p>
+    </div>
+  </div>
+</div>
+<!-- Кнопки прокрутки -->
+    <button id="scrollUp" class="scroll-btn">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    <button id="scrollDown" class="scroll-btn">
+        <i class="fas fa-arrow-down"></i>
+    </button>
+
+    <!-- Слайдер изображений -->
+<div class="image-slider">
+    <div><img src="https://e-history.kz/storage/tmp/resize/news/1200_0_2ef69c68554ddd5e8bccd2d6daaf11a2.jpg" alt="Историческое событие 1"></div>
+    <div><img src="https://avatars.mds.yandex.net/i?id=e13b7435ae5b386e6be6c75bf866c514ced26b1e-10332876-images-thumbs&n=13" alt="Историческое событие 2"></div>
+    <div><img src="https://avatars.mds.yandex.net/i?id=c1302816068d768b23bd3ef89baf0f2c5b51bc5a-8207729-images-thumbs&n=13" alt="Историческое событие 3"></div>
+</div>
+
+<!-- Контейнер для карты -->
+<div id="map"></div>
+
+<!-- Кнопка для показа дополнительных таблиц -->
+<button id="toggleDetails">Узнать больше</button>
+
+<div id="details" class="hidden">
+    <div class="content">
+        <h2>Таблица событий</h2>
+        <!-- Фильтрация -->
+        <input type="text" id="eventSearch" class="search-bar" placeholder="Поиск по событиям..." onkeyup="filterTable('events')">
+        
+        <!-- Кнопки сортировки -->
+        <div class="sort-buttons">
+            <button onclick="sortTable(0, 'events')">Сортировать по событию</button>
+            <button onclick="sortTable(1, 'events')">Сортировать по дате</button>
+        </div>
+
+        <table id="eventsTable">
+            <thead>
+                <tr>
+                    <th>Событие</th>
+                    <th>Дата</th>
+                    <th>Описание</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Данные событий будут загружены здесь -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="content">
+        <h2>Таблица личностей</h2>
+        <!-- Фильтрация -->
+        <input type="text" id="personSearch" class="search-bar" placeholder="Поиск по личностям..." onkeyup="filterTable('persons')">
+
+        <!-- Кнопки сортировки -->
+        <div class="sort-buttons">
+            <button onclick="sortTable(0, 'persons')">Сортировать по имени</button>
+            <button onclick="sortTable(1, 'persons')">Сортировать по дате рождения</button>
+        </div>
+
+        <table id="personsTable">
+            <thead>
+                <tr>
+                    <th>Имя</th>
+                    <th>Дата рождения</th>
+                    <th>Описание</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Данные личностей будут загружены здесь -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- Подключаем jQuery и плагин jQuery Easing -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+
+    <!-- Подключаем Slick CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"/>
+
+<!-- Подключаем Slick JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script>
+        // Функция для загрузки XML данных
+function loadXMLData() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'history_of_kazakhstan.xml', true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            parseXML(xhr.responseXML);
+        }
+    };
+    xhr.send();
+}
+
+// Функция для парсинга XML и загрузки данных в таблицы
+function parseXML(xml) {
+    const eventsTableBody = document.querySelector("#eventsTable tbody");
+    const personsTableBody = document.querySelector("#personsTable tbody");
+
+    const events = xml.getElementsByTagName('event');
+    const persons = xml.getElementsByTagName('person');
+
+    // Загрузка событий
+    for (let i = 0; i < events.length; i++) {
+        const title = events[i].getElementsByTagName('title')[0].textContent;
+        const date = events[i].getElementsByTagName('date')[0].textContent;
+        const description = events[i].getElementsByTagName('description')[0].textContent;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${title}</td><td>${date}</td><td>${description}</td>`;
+        eventsTableBody.appendChild(row);
+    }
+
+    // Загрузка личностей
+    for (let i = 0; i < persons.length; i++) {
+        const name = persons[i].getElementsByTagName('name')[0].textContent;
+        const birth = persons[i].getElementsByTagName('birth')[0].textContent;
+        const death = persons[i].getElementsByTagName('death')[0].textContent;
+        const description = persons[i].getElementsByTagName('description')[0].textContent;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${name}</td><td>${birth} - ${death}</td><td>${description}</td>`;
+        personsTableBody.appendChild(row);
+    }
+}
+
+// Функция для сортировки таблиц
+function sortTable(n, tableType) {
+    const table = document.getElementById(tableType + 'Table');
+    const rows = Array.from(table.rows).slice(1);
+    const isNumeric = !isNaN(rows[0].cells[n].innerText);
+
+    rows.sort((rowA, rowB) => {
+        const cellA = rowA.cells[n].innerText.trim();
+        const cellB = rowB.cells[n].innerText.trim();
+        
+        return isNumeric ? parseFloat(cellA) - parseFloat(cellB) : cellA.localeCompare(cellB);
+    });
+
+    rows.forEach(row => table.appendChild(row));
+}
+
+// Функция для фильтрации таблиц по строкам
+function filterTable(tableType) {
+    const searchInput = tableType === 'events' ? document.getElementById('eventSearch') : document.getElementById('personSearch');
+    const filter = searchInput.value.toLowerCase();
+    const table = document.getElementById(tableType + 'Table');
+    const rows = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < rows.length; i++) {
+        const cells = rows[i].getElementsByTagName('td');
+        let match = false;
+        
+        for (let j = 0; j < cells.length; j++) {
+            if (cells[j].innerText.toLowerCase().includes(filter)) {
+                match = true;
+                break;
+            }
+        }
+
+        rows[i].style.display = match ? '' : 'none';
+    }
+}
+
+// Функция для показа/скрытия деталей
+document.getElementById("toggleDetails").addEventListener("click", function() {
+    const details = document.getElementById("details");
+    details.classList.toggle("hidden");
+    if (!details.classList.contains("hidden")) {
+        loadXMLData();  // Загружаем данные из XML при показе
+    }
+});
+        
+        // Инициализация карты с координатами для Казахстана
+        var map = L.map('map').setView([48.0196, 66.9237], 6); // Координаты Казахстана
+
+        // Подключаем слой карты от OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Создаем кластер для маркеров
+        var markers = L.markerClusterGroup();
+
+        // Добавление маркеров для исторических мест с событиями
+        var historicalPlaces = [
+            {
+                name: "Алматы",
+                lat: 43.2220,
+                lng: 76.8512,
+                popup: "<b>Алматы</b><br>Важный исторический центр Казахстана, где происходили важные события в истории страны, например, народные волнения в 1916 году."
+            },
+            {
+                name: "Нур-Султан (Астана)",
+                lat: 51.1694,
+                lng: 71.4491,
+                popup: "<b>Нур-Султан (Астана)</b><br>Столица Казахстана с 1997 года, место подписания ряда важных международных соглашений."
+            },
+            {
+                name: "Туркестан",
+                lat: 43.3000,
+                lng: 68.2500,
+                popup: "<b>Туркестан</b><br>Исторический и культурный центр Казахстана, связанный с исламской историей и культурой."
+            },
+            {
+                name: "Кызылорда",
+                lat: 44.8597,
+                lng: 65.4820,
+                popup: "<b>Кызылорда</b><br>Исторический центр, бывшая столица Казахской ССР в 1925-1927 годах."
+            },
+            {
+                name: "Шымкент",
+                lat: 42.3417,
+                lng: 69.5901,
+                popup: "<b>Шымкент</b><br>Ключевая торговая точка, имевшая важное значение в истории Казахстана."
+            },
+            {
+                name: "Петропавловск",
+                lat: 54.8642,
+                lng: 69.1895,
+                popup: "<b>Петропавловск</b><br>Город на северном побережье Казахстана, важный экономический и культурный центр."
+            },
+            {
+                name: "Кокшетау",
+                lat: 53.2833,
+                lng: 69.4000,
+                popup: "<b>Кокшетау</b><br>Город с богатой историей, связанный с культурным наследием казахского народа."
+            },
+            {
+                name: "Атырау",
+                lat: 47.1150,
+                lng: 51.8930,
+                popup: "<b>Атырау</b><br>Город, имеющий важное значение для нефтяной и газовой промышленности Казахстана."
+            },
+            {
+                name: "Уральск",
+                lat: 51.2100,
+                lng: 51.2140,
+                popup: "<b>Уральск</b><br>Культурный и исторический центр на западной границе Казахстана."
+            },
+            {
+                name: "Семей",
+                lat: 50.4244,
+                lng: 80.2292,
+                popup: "<b>Семей</b><br>Город, который был важным научным и культурным центром в Советский период. Также известен как место ядерных испытаний."
+            }
+        ];
+
+        // Добавление маркеров на карту с использованием плагина markercluster
+        historicalPlaces.forEach(function(place) {
+            var marker = L.marker([place.lat, place.lng])
+                .bindPopup(place.popup);
+            markers.addLayer(marker); // Добавляем маркер в кластер
+        });
+
+        // Добавляем кластер на карту
+        map.addLayer(markers);
+
+
+       $(document).ready(function(){
+    // Инициализация слайдера с эффектами
+    $('.image-slider').slick({
+        dots: true, // Показывать точки навигации
+        arrows: true, // Показывать стрелки
+        autoplay: true, // Автоматическое переключение
+        autoplaySpeed: 3000, // Скорость смены слайдов
+        speed: 800, // Скорость перехода между слайдами
+        fade: true, // Плавный переход (эффект затухания)
+        cssEase: 'ease', // Плавность анимации
+    });
+});
+
+
+
+ $(document).ready(function() {
+    // Прокрутка вверх
+    $('#scrollUp').click(function() {
+        $('html, body').animate({ scrollTop: 0 }, 800, 'easeInOutQuad');
+    });
+
+    // Прокрутка вниз
+    $('#scrollDown').click(function() {
+        $('html, body').animate({ scrollTop: $(document).height() }, 800, 'easeInOutQuad');
+    });
+});
+
+ $(document).ready(function() {
+    // Модальное окно
+    const $modal = $('#modal-add-event');
+    const $btn = $('#add-button');
+    const $span = $('.close');
+    const $saveButton = $('#save-event-button');
+
+    // Открытие модального окна
+    $btn.on('click', function() {
+        $modal.show();
+    });
+
+    // Закрытие модального окна
+    $span.on('click', function() {
+        $modal.hide();
+    });
+
+    // Сохранение события
+    $saveButton.on('click', function() {
+        const eventName = $('#event-name').val();
+        const eventYear = $('#event-year').val();
+
+        if (eventName && eventYear) {
+            const $table = $('#history-table');
+            const order = $table.find('tr').length;
+
+            // Добавление новой строки
+            const $newRow = $('<tr>').attr('data-order', order);
+
+            // Добавление ячеек в строку
+            const $cell1 = $('<td>').text(eventName);
+            const $cell2 = $('<td>').text(eventYear);
+            const $cell3 = $('<td>');
+            const $removeButton = $('<button>').addClass('remove-button').text('Удалить');
+
+            // Добавление кнопки удаления
+            $cell3.append($removeButton);
+            $newRow.append($cell1, $cell2, $cell3);
+            $table.append($newRow);
+
+            // Добавление функционала кнопке удаления
+            $removeButton.on('click', function() {
+                $newRow.remove();
+            });
+
+            // Закрытие модального окна
+            $modal.hide();
+        }
+    });
+});
+
+new Vue({
+    el: '#app',
+    data: {
+      years: [1991, 2006, 2010, 2017],
+      events: {
+        1991: { year: 1991, description: "Казахстан объявил о независимости." },
+        2006: { year: 2006, description: "Введение нового государственного символа - флага Казахстана." },
+        2010: { year: 2010, description: "Казахстан стал председателем ОБСЕ." },
+        2017: { year: 2017, description: "В Астане прошла международная выставка ЭКСПО-2017." }
+      },
+      selectedEvent: null
+    },
+    methods: {
+      selectYear(year) {
+        this.selectedEvent = this.events[year];
+      }
+    }
+  });
+
+        // Canvas Animation Code
+        const canvas = document.getElementById('canvas-animation');
+        const ctx = canvas.getContext('2d');
+        let x = 0;
+        let direction = 1;
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#3498db';
+            ctx.beginPath();
+            ctx.arc(x, 50, 10, 0, Math.PI * 2);
+            ctx.fill();
+
+            x += 2 * direction;
+            if (x > canvas.width - 10 || x < 10) {
+                direction *= -1;
+            }
+            requestAnimationFrame(animateCanvas);
+        }
+
+        animateCanvas();
+
+        // График с использованием Chart.js
+        const ctxChart = document.getElementById('history-chart').getContext('2d');
+        const historyChart = new Chart(ctxChart, {
+            type: 'line',
+            data: {
+                labels: ['Древний Казахстан', 'Средневековье', 'Современный Казахстан'],
+                datasets: [{
+                    label: 'Важные события Казахстана',
+                    data: [500, 1200, 1991], // Пример данных (год)
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        $(document).ready(function() {
+  $('#toggle-style').click(function() {
+    // Переключаем класс 'dark-theme' на <body> и кнопку
+    $('body').toggleClass('dark-theme');
+    $(this).toggleClass('dark-theme');
+    
+    // Меняем текст кнопки в зависимости от текущего стиля
+    if ($('body').hasClass('dark-theme')) {
+      $(this).text('Вернуть светлый стиль');
+    } else {
+      $(this).text('Сменить стиль');
+    }
+  });
+});
+
+
+        // Фильтрация таблицы
+        document.getElementById('filter-button').addEventListener('click', function() {
+            const filterText = document.getElementById('filter-input').value.toLowerCase();
+            const rows = Array.from(document.getElementById('history-table').getElementsByTagName('tr')).slice(1);
+
+            rows.forEach(row => {
+                const rowText = row.cells[0].textContent.toLowerCase();
+                row.style.display = rowText.includes(filterText) ? '' : 'none';
+            });
+        });
+
+        // Очистка фильтра
+        document.getElementById('clear-filter-button').addEventListener('click', function() {
+            document.getElementById('filter-input').value = '';
+            const rows = Array.from(document.getElementById('history-table').getElementsByTagName('tr')).slice(1);
+            rows.forEach(row => row.style.display = '');
+        });
+
+        $(document).ready(function() {
+    // Модальное окно
+    const $modal = $('#modal-add-event');
+    const $btn = $('#add-button');
+    const $span = $('.close');
+    const $saveButton = $('#save-event-button');
+
+    // Открытие модального окна
+    $btn.on('click', function() {
+        $modal.show();
+    });
+
+    // Закрытие модального окна
+    $span.on('click', function() {
+        $modal.hide();
+    });
+
+    // Сохранение события
+    $saveButton.on('click', function() {
+        const eventName = $('#event-name').val();
+        const eventYear = $('#event-year').val();
+
+        if (eventName && eventYear) {
+            const $table = $('#history-table');
+            const order = $table.find('tr').length;
+
+            // Добавление новой строки
+            const $newRow = $('<tr>').attr('data-order', order);
+
+            // Добавление ячеек в строку
+            const $cell1 = $('<td>').text(eventName);
+            const $cell2 = $('<td>').text(eventYear);
+            const $cell3 = $('<td>');
+            const $removeButton = $('<button>').addClass('remove-button').text('Удалить');
+
+            // Добавление кнопки удаления
+            $cell3.append($removeButton);
+            $newRow.append($cell1, $cell2, $cell3);
+            $table.append($newRow);
+
+            // Добавление функционала кнопке удаления
+            $removeButton.on('click', function() {
+                $newRow.remove();
+            });
+
+            // Закрытие модального окна
+            $modal.hide();
+        }
+    });
+});
+
+        // Удаление строки таблицы
+        function addRemoveEvent(button) {
+            button.addEventListener('click', function() {
+                const row = button.closest('tr');
+                row.remove();
+            });
+        }
+
+        // Сортировка таблицы
+        document.getElementById('sort-button').addEventListener('click', function() {
+            const table = document.getElementById('history-table');
+            const rows = Array.from(table.getElementsByTagName('tr')).slice(1);
+
+            rows.sort((a, b) => {
+                const orderA = parseInt(a.getAttribute('data-order'));
+                const orderB = parseInt(b.getAttribute('data-order'));
+                return orderA - orderB;
+            });
+
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = '';  // Очистка таблицы перед добавлением отсортированных строк
+            rows.forEach(row => tbody.appendChild(row)); // Вставляем отсортированные строки обратно в таблицу
+        });
+
+        // Вывод текущей даты и времени
+        const dateInfo = `
+            <div>
+                <h3>Текущая дата и время</h3>
+                <p>${new Date().toLocaleString('ru-RU', { timeZone: 'Asia/Almaty' })}</p>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', dateInfo);
+    </script>
+</body>
+</html>
